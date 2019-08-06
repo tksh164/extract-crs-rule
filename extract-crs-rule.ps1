@@ -46,23 +46,25 @@ function Out-CrsSecRuleInfo
                 }
             } |
 
-            # We need "SecRule" line only.
+            # We need "SecRule" directive only.
             Where-Object -FilterScript {
                 $_.StartsWith('SecRule')
             } |
 
             # Extract necessary information from the line.
             ForEach-Object -Process {
+                $parts = $_ | ConvertFrom-Csv -Header 'Directive','Variables','Operator','Actions' -Delimiter ' '
+
                 $rulePhase = ''
-                if ($_ -match '.+phase:([^,]+),.+')
+                if ($parts.Actions -match '.*phase:([^,]+),.*')
                 {
-                    $rulePhase = $Matches[1]
+                    $rulePhase = $Matches[1].Trim('''')
                 }
 
                 $ruleId = ''
-                if ($_ -match '.+id:([^,]+),.+')
+                if ($parts.Actions -match '.*id:([^,]+),.*')
                 {
-                    $ruleId = $Matches[1]
+                    $ruleId = $Matches[1].Trim('''')
                 }
 
                 if (($rulePhase -ne '') -and ($ruleId -ne ''))
