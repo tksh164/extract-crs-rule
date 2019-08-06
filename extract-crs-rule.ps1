@@ -67,12 +67,19 @@ function Out-CrsSecRuleInfo
                     $ruleId = $Matches[1].Trim('''')
                 }
 
+                $action = ''
+                if ($parts.Actions -match '.*(pass|block|deny).*')
+                {
+                    $action = $Matches[1].Trim('''')
+                }
+
                 if (($rulePhase -ne '') -and ($ruleId -ne ''))
                 {
                     [PSCustomObject] @{
                         RuleFileName = $ruleFileName
                         RuleId       = $ruleId
                         RulePhase    = $rulePhase
+                        Action       = $action
                     }
                 }
             }
