@@ -21,6 +21,8 @@ function Out-CrsSecRuleInfo
         $combinedTextBuilder = New-Object -TypeName 'System.Text.StringBuilder'
 
         Get-Content -LiteralPath $RuleFile.FullName -ReadCount 1 -Encoding utf8 |
+
+            # Skip empty lines and commented lines.
             ForEach-Object -Process {
                 $trimedLineText = $_.Trim()
                 if ((-not [string]::IsNullOrWhiteSpace($trimedLineText)) -and (-not $trimedLineText.StartsWith('#')))
@@ -28,6 +30,8 @@ function Out-CrsSecRuleInfo
                     $trimedLineText
                 }
             } |
+
+            # Combine the continuing lines.
             ForEach-Object -Process {
                 $lineText = $_
                 if ($lineText.EndsWith('\'))
@@ -41,9 +45,13 @@ function Out-CrsSecRuleInfo
                     [void] $combinedTextBuilder.Clear()
                 }
             } |
+
+            # We need "SecRule" line only.
             Where-Object -FilterScript {
                 $_.StartsWith('SecRule')
             } |
+
+            # Extract necessary information from the line.
             ForEach-Object -Process {
                 $rulePhase = ''
                 if ($_ -match '.+phase:([^,]+),.+')
